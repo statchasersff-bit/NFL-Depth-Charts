@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: StatChasers NFL Depth Charts API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: depth-charts
+    description: NFL depth chart data
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
@@ -24,6 +28,96 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /nfl/depth-charts:
+    get:
+      operationId: getAllDepthCharts
+      tags: [depth-charts]
+      summary: Get all NFL team depth charts
+      description: Returns latest cached depth charts for all 32 NFL teams
+      responses:
+        "200":
+          description: All depth charts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepthChartSnapshot"
+        "503":
+          description: No data available yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /nfl/depth-charts/{team}:
+    get:
+      operationId: getTeamDepthChart
+      tags: [depth-charts]
+      summary: Get depth chart for one team
+      description: Returns latest cached depth chart for a team by abbreviation (e.g. BUF, KC, DAL)
+      parameters:
+        - in: path
+          name: team
+          required: true
+          schema:
+            type: string
+          description: Team abbreviation (e.g. BUF, KC, DAL)
+      responses:
+        "200":
+          description: Team depth chart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepthChartSnapshot"
+        "404":
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/nfl/depth-charts/refresh:
+    post:
+      operationId: refreshDepthCharts
+      tags: [admin]
+      summary: Refresh all depth charts from ESPN
+      description: Protected by x-admin-secret header. Fetches all 32 teams from ESPN.
+      responses:
+        "200":
+          description: Refresh result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/nfl/depth-charts/status:
+    get:
+      operationId: getRefreshStatus
+      tags: [admin]
+      summary: Get depth chart cache status
+      description: Returns last refresh time, successful teams, failed teams, and total cached teams
+      responses:
+        "200":
+          description: Cache status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CacheStatus"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +128,122 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    DepthChartPlayer:
+      type: object
+      required: [rank, name, position]
+      properties:
+        rank:
+          type: integer
+        name:
+          type: string
+        position:
+          type: string
+        jersey:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        headshot:
+          type: ["string", "null"]
+
+    DepthChartPositionGroup:
+      type: object
+      required: [position, label, players]
+      properties:
+        position:
+          type: string
+        label:
+          type: string
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepthChartPlayer"
+
+    DepthChartGroups:
+      type: object
+      required: [offense, defense, specialTeams]
+      properties:
+        offense:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepthChartPositionGroup"
+        defense:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepthChartPositionGroup"
+        specialTeams:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepthChartPositionGroup"
+
+    DepthChartTeam:
+      type: object
+      required: [abbr, name]
+      properties:
+        abbr:
+          type: string
+        name:
+          type: string
+        logo:
+          type: ["string", "null"]
+
+    DepthChartSnapshot:
+      type: object
+      required: [id, team, season, source, sourceUrl, fetchedAt, groups]
+      properties:
+        id:
+          type: integer
+        team:
+          $ref: "#/components/schemas/DepthChartTeam"
+        season:
+          type: integer
+        source:
+          type: string
+        sourceUrl:
+          type: string
+        fetchedAt:
+          type: string
+          format: date-time
+        groups:
+          $ref: "#/components/schemas/DepthChartGroups"
+
+    RefreshResult:
+      type: object
+      required: [success, teamsRefreshed, teamsFailed, message]
+      properties:
+        success:
+          type: boolean
+        teamsRefreshed:
+          type: integer
+        teamsFailed:
+          type: integer
+        message:
+          type: string
+        failedTeams:
+          type: array
+          items:
+            type: string
+
+    CacheStatus:
+      type: object
+      required: [totalCached, lastRefreshAt, successfulTeams, failedTeams]
+      properties:
+        totalCached:
+          type: integer
+        lastRefreshAt:
+          type: ["string", "null"]
+          format: date-time
+        successfulTeams:
+          type: array
+          items:
+            type: string
+        failedTeams:
+          type: array
+          items:
+            type: string

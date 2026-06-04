@@ -1,0 +1,174 @@
+Build a standalone StatChasers NFL Team Depth Charts web tool. This is not for Dynasty Command. It will be embedded directly on the StatChasers website, likely WordPress/Divi.
+
+Goal:
+Create a public NFL depth charts tool that fetches depth chart data server-side from ESPN, normalizes it, caches it, and exposes it through our own API and embeddable frontend widget.
+
+Do not use Dynasty Command auth, Dynasty Command routes, Dynasty Command layout, or Sleeper data.
+
+Core requirements:
+1. Build a standalone Replit app with:
+- Express backend
+- React frontend or embeddable vanilla JS widget
+- Server-side ESPN data fetching
+- Cached normalized depth chart data
+- Public API endpoints
+- Admin refresh endpoint protected by ADMIN_SECRET
+
+Data source:
+Use ESPN depth chart pages and/or ESPN JSON endpoints server-side only.
+Example public ESPN page:
+https://www.espn.com/nfl/team/depth/_/name/buf
+
+Do not fetch ESPN from the browser.
+All ESPN requests must happen on the server.
+
+Backend routes:
+GET /api/nfl/depth-charts
+Returns latest cached depth charts for all 32 NFL teams.
+
+GET /api/nfl/depth-charts/:team
+Returns latest cached depth chart for one team by abbreviation, such as BUF, KC, DAL.
+
+POST /api/admin/nfl/depth-charts/refresh
+Protected by ADMIN_SECRET. Refreshes all 32 teams from ESPN and updates the cache/database.
+
+GET /api/admin/nfl/depth-charts/status
+Returns last refresh time, successful teams, failed teams, and total cached teams.
+
+Frontend routes:
+GET /nfl-depth-charts
+Standalone public page for the full tool.
+
+GET /embed/depth-charts.js
+Embeddable script that can be placed on WordPress/Divi using:
+<div id="statchasers-depth-charts"></div>
+<script src="https://REPLIT_URL/embed/depth-charts.js"></script>
+
+Database/cache:
+Create a table or JSON cache for:
+- team_abbr
+- team_name
+- season
+- source
+- source_url
+- normalized_depth_chart
+- raw_response optional
+- fetched_at
+
+Suggested schema:
+nfl_depth_chart_snapshots:
+- id
+- season
+- team_abbr
+- team_name
+- source
+- source_url
+- normalized json/jsonb
+- raw json/jsonb
+- fetched_at
+
+Normalization:
+Normalize all teams into this shape:
+
+{
+  team: {
+    abbr: "BUF",
+    name: "Buffalo Bills",
+    logo: ""
+  },
+  season: 2026,
+  source: "ESPN",
+  sourceUrl: "https://www.espn.com/nfl/team/depth/_/name/buf",
+  fetchedAt: "ISO timestamp",
+  groups: {
+    offense: [
+      {
+        position: "QB",
+        label: "Quarterback",
+        players: [
+          {
+            rank: 1,
+            name: "Josh Allen",
+            position: "QB",
+            jersey: "17",
+            status: null,
+            headshot: null
+          }
+        ]
+      }
+    ],
+    defense: [],
+    specialTeams: []
+  }
+}
+
+Frontend page requirements:
+1. Public page title:
+NFL Team Depth Charts
+
+2. Subtitle:
+Updated NFL depth charts for all 32 teams.
+
+3. Add:
+- Team selector
+- Search player input
+- Offense / Defense / Special Teams tabs
+- Last updated timestamp
+- Source attribution
+
+4. Display:
+- Team logo or team initials
+- Position groups as cards
+- Players ranked by depth chart order
+- Mobile-friendly card layout
+- No giant tables on mobile
+
+5. Add a clean StatChasers-style design:
+- White/light background
+- Dark text
+- Gold accents
+- Rounded cards
+- Clean shadows
+- Responsive layout
+- Match StatChasers website style, not Dynasty Command’s dark app style
+
+6. Add loading/error states:
+- Loading skeletons
+- Cached data unavailable message
+- Team failed to load message
+- Last updated timestamp
+
+7. Add source attribution at the bottom:
+Depth chart data sourced from ESPN. Last fetched: [timestamp].
+
+8. Add CORS:
+Allow requests only from:
+- statchasers.com
+- www.statchasers.com
+- local dev
+
+9. Add scheduled refresh support:
+Create a script:
+scripts/refreshDepthCharts.ts
+
+This script should refresh all 32 NFL teams and save results.
+
+The app should support Replit scheduled deployments so the refresh can run automatically every few hours.
+
+10. Error handling:
+- If ESPN fails for one team, continue refreshing other teams.
+- If ESPN is down, serve latest cached data.
+- Never let one bad ESPN response break the whole page.
+- Use fetch timeouts.
+- Limit concurrency to 3 teams at a time.
+- Log failed teams clearly.
+
+11. Admin refresh:
+Add a simple admin-only endpoint:
+POST /api/admin/nfl/depth-charts/refresh
+
+Require header:
+x-admin-secret: process.env.ADMIN_SECRET
+
+12. Do not include any Dynasty Command references.
+This is a public StatChasers website tool.
