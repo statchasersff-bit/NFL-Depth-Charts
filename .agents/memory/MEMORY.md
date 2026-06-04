@@ -1,0 +1,1 @@
+- [ESPN Depth Chart API Shape](espn-depth-chart-api.md) — the `depthchart` key is an object with numeric keys (formations), not an `items` array; slot abbrs are used for display, parent abbrs for category classification.
