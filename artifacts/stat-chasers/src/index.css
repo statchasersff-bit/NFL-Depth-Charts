@@ -70,7 +70,7 @@
   --elevate-2: rgba(0,0,0, .08);
 
   /* Light Theme / StatChasers */
-  --background: 210 20% 98%; /* F8FAFC */
+  --background: 0 0% 100%; /* white — plugin sits on a white site, so the furthest-back layer must be pure white */
   --foreground: 222 47% 11%; /* 0F172A */
   --border: 214 32% 91%; /* E2E8F0 */
   
@@ -129,6 +129,23 @@
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
+
+  /* StatChasers depth-chart theme accents (premium scouting-board look) */
+  --sc-bg: #f7f9fc;
+  --sc-card: #ffffff;
+  --sc-card-border: #e5eaf2; /* cool gray — team surface border */
+  --sc-ink: #1f2b45;
+  --sc-muted: #64748b;
+  --sc-faint: #94a3b8; /* quiet rank numerals */
+  --sc-border: #dbe3ef;
+  --sc-rule: #eef2f8; /* hairline separators inside a team surface */
+  --sc-navy: #111827;
+  --sc-header: #1e3a6e; /* navy blue — legacy token, kept for reference */
+  --sc-blue: #0f4fd8;
+  --sc-gold: #f6c343;
+  --sc-gold-dark: #c99700;
+  --sc-gold-soft: #fff6d6;
+  --sc-row-hover: #f4f7fc; /* subtle player-row hover tint */
 }
 
 .dark {
@@ -173,4 +190,142 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
+}
+
+/* Everything below is scoped under .depth-app-root — the single wrapper around
+   the whole tool — so these rules can't leak into the surrounding WordPress/Divi
+   page (and its global CSS can't reach in). All project class names are prefixed
+   depth-app-; the --sc-* custom properties are the design tokens, not classes. */
+
+@layer utilities {
+  /* Thicker, rounded horizontal scrollbar for the depth-chart columns:
+     light track, navy thumb that warms to gold on hover. */
+  .depth-app-root .depth-app-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sc-navy) var(--sc-bg);
+  }
+  .depth-app-root .depth-app-scroll::-webkit-scrollbar {
+    height: 10px;
+  }
+  .depth-app-root .depth-app-scroll::-webkit-scrollbar-track {
+    background: var(--sc-bg);
+    border-radius: 9999px;
+  }
+  .depth-app-root .depth-app-scroll::-webkit-scrollbar-thumb {
+    background: var(--sc-navy);
+    border-radius: 9999px;
+    border: 2px solid var(--sc-bg);
+  }
+  .depth-app-root .depth-app-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--sc-gold-dark);
+  }
+}
+
+/* Premium team surface — one cohesive card holding the header + every position
+   group, replacing the old header-floating-above-five-bordered-boxes layout.
+   Subtle layered shadow, cool-gray hairline border, generous-but-compact pad. */
+.depth-app-root .depth-app-team-card {
+  background: var(--sc-card);
+  border: 1px solid var(--sc-card-border);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 8px 24px rgba(15, 23, 42, 0.035);
+  padding: 1.1rem 1.15rem 1rem;
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+.depth-app-root .depth-app-team-card:hover {
+  border-color: #d7deec;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+/* Editorial position-group rule: a short gold micro-accent then a light
+   hairline running the width of the column — replaces the heavy navy bar. */
+.depth-app-root .depth-app-colrule {
+  height: 2px;
+  margin: 4px 0 5px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--sc-gold) 0,
+    var(--sc-gold) 1.35rem,
+    var(--sc-rule) 1.35rem,
+    var(--sc-rule) 100%
+  );
+}
+
+/* Depth-chart player rows.
+   Full, roomy spacing by default. A position column only shrinks to its
+   min width (10rem) when its team card can't fit the columns and must
+   scroll horizontally — so we compact the left gutter, rank column and
+   text ONLY at that width, via a container query. Kept outside @layer so
+   these win over the Tailwind utilities on the same elements. */
+.depth-app-root .depth-app-player-row { padding-left: 0.5rem; }
+
+/* Fit-to-width: --sc-fit is 1 normally and drops to 0.8 (set in JS on the
+   scroll container) when a team card's columns overflow and would otherwise
+   force horizontal scrolling. It scales the column track widths (see the grid
+   template) and the horizontal table padding below by up to 20% so more
+   columns pack onto the screen. At --sc-fit:1 these equal the base px-2/p-1. */
+.depth-app-root .depth-app-colhead {
+  padding-left: calc(0.5rem * var(--sc-fit, 1));
+  padding-right: calc(0.5rem * var(--sc-fit, 1));
+}
+.depth-app-root .depth-app-colbody {
+  padding-left: 0;
+  padding-right: calc(0.25rem * var(--sc-fit, 1));
+}
+.depth-app-root .depth-app-player-row { padding-right: calc(0.5rem * var(--sc-fit, 1)); }
+
+.depth-app-root .depth-app-rank { width: 1.25rem; font-size: 0.875rem; }
+.depth-app-root .depth-app-name { font-size: 0.875rem; }
+.depth-app-root .depth-app-name-abbr { display: none; }               /* full name shown by default */
+.depth-app-root .depth-app-colhead-abbr { display: none; }            /* full header shown by default */
+
+/* Step 1 — column squeezed toward its min: compact gutter/rank + smaller text. */
+@container (max-width: 10rem) {
+  .depth-app-root .depth-app-player-row { padding-left: 1px; }        /* + 4px body padding = 5px gap */
+  .depth-app-root .depth-app-rank { width: 0.9rem; }                  /* pull the name left with the number */
+  .depth-app-root .depth-app-rank, .depth-app-root .depth-app-name { font-size: 0.7rem; }    /* 20% smaller, rank locked to name */
+}
+
+/* Header labels ("WIDE RECEIVERS") are long — plus the count badge and padding
+   they need ~10rem to fit. Swap them to the compact form ("WR") well before that
+   width so the full label is never shown mid-truncation (a narrower swap left a
+   band where "WIDE RECEIV…" flashed before collapsing to "WR"). Decoupled from
+   the player-name swap below, which stays at 8.5rem since names are shorter. */
+@container (max-width: 10rem) {
+  .depth-app-root .depth-app-colhead-full { display: none; }
+  .depth-app-root .depth-app-colhead-abbr { display: inline; }
+}
+
+/* Step 2 — column at its narrowest (scrolling) width even after the text
+   shrank: switch the name to "first-initial last-name". */
+@container (max-width: 8.5rem) {
+  .depth-app-root .depth-app-name-full { display: none; }
+  .depth-app-root .depth-app-name-abbr { display: block; }
+}
+
+/* Small mobile screens: shrink the depth-chart text ~20% so more fits per row.
+   Viewport-based (not the per-column container query above), so it applies to
+   the column headers and player rows regardless of how wide each column is. */
+@media (max-width: 480px) {
+  .depth-app-root .depth-app-name, .depth-app-root .depth-app-rank { font-size: 0.7rem; }        /* 0.875rem → 0.7rem */
+  .depth-app-root .depth-app-colhead-full, .depth-app-root .depth-app-colhead-abbr { font-size: 0.55rem; } /* ~11px → ~9px */
+
+  /* Shrink the view-switch tab text (and tighten padding) so all four tabs stay
+     on a single row instead of wrapping "Special Teams" to a second line. */
+  .depth-app-root .depth-app-tab { font-size: 0.72rem; padding-left: 0.625rem; padding-right: 0.625rem; }
+}
+
+/* Step 3 — column at its narrowest (scrolling) width: drop the depth numbers
+   and align the player names directly under the column header text. The header
+   text sits 9px in (1px border + 8px padding); the body content starts 5px in
+   (1px border + 4px padding), so a 4px row padding lands the name at 9px too. */
+@container (max-width: 7rem) {
+  .depth-app-root .depth-app-rank { display: none; }
+  .depth-app-root .depth-app-move { display: none; }        /* keep every name aligned under the header */
+  .depth-app-root .depth-app-player-row { padding-left: 4px; }
 }

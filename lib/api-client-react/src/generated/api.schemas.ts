@@ -13,16 +13,41 @@ export interface ErrorResponse {
   error: string;
 }
 
+/**
+ * Rank change vs the previous snapshot, if known.
+ * @nullable
+ */
+export type DepthChartPlayerMovement = typeof DepthChartPlayerMovement[keyof typeof DepthChartPlayerMovement] | null;
+
+
+export const DepthChartPlayerMovement = {
+  up: 'up',
+  down: 'down',
+  new: 'new',
+} as const;
+
 export interface DepthChartPlayer {
   rank: number;
   name: string;
   position: string;
+  /** @nullable */
+  playerId?: string | null;
   /** @nullable */
   jersey?: string | null;
   /** @nullable */
   status?: string | null;
   /** @nullable */
   headshot?: string | null;
+  /**
+     * Link to the player's profile page on the source site, if known.
+     * @nullable
+     */
+  profileUrl?: string | null;
+  /**
+     * Rank change vs the previous snapshot, if known.
+     * @nullable
+     */
+  movement?: DepthChartPlayerMovement;
 }
 
 export interface DepthChartPositionGroup {
@@ -44,6 +69,11 @@ export interface DepthChartTeam {
   logo?: string | null;
 }
 
+/**
+ * Matrix-friendly map of canonical column key -> ranked players. Keys cover every column used across the Fantasy / Offense / Defense / Special Teams tabs.
+ */
+export interface DepthChartPositions {[key: string]: DepthChartPlayer[]}
+
 export interface DepthChartSnapshot {
   id: number;
   team: DepthChartTeam;
@@ -52,6 +82,7 @@ export interface DepthChartSnapshot {
   sourceUrl: string;
   fetchedAt: string;
   groups: DepthChartGroups;
+  positions: DepthChartPositions;
 }
 
 export interface RefreshResult {

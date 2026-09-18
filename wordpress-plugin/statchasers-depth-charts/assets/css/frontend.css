@@ -1,0 +1,852 @@
+/* StatChasers Depth Charts — front-end styles.
+   Everything is scoped under .scdc-root and defines its own design tokens so it
+   blends onto a white page without inheriting/leaking the host theme's styles. */
+
+.scdc-root {
+	--sc-bg: #f7f9fc;
+	--sc-card: #ffffff;
+	--sc-card-border: #e5eaf2; /* cool gray — team surface border */
+	--sc-ink: #1f2b45;
+	--sc-muted: #64748b;
+	--sc-faint: #94a3b8; /* quiet rank numerals */
+	--sc-border: #dbe3ef;
+	--sc-rule: #eef2f8; /* hairline separators inside a team surface */
+	--sc-navy: #111827;
+	--sc-header: #1e3a6e;
+	--sc-blue: #0f4fd8;
+	--sc-gold: #f6c343;
+	--sc-gold-dark: #c99700;
+	--sc-gold-soft: #fff6d6;
+	--sc-row-hover: #f4f7fc; /* subtle player-row hover tint */
+
+	background: #ffffff;
+	color: var(--sc-ink);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.45;
+	box-sizing: border-box;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.scdc-root *,
+.scdc-root *::before,
+.scdc-root *::after {
+	box-sizing: border-box;
+}
+
+/* ---- States ---- */
+.scdc-empty,
+.scdc-loading,
+.scdc-error {
+	background: var(--sc-card);
+	border: 1px solid var(--sc-border);
+	border-top: 4px solid var(--sc-gold);
+	border-radius: 12px;
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+	padding: 3rem 1.5rem;
+	text-align: center;
+	color: var(--sc-muted);
+	font-weight: 500;
+}
+
+/* ---- Controls ---- */
+/* One intentional control system: no heavy card, tightened vertical rhythm. */
+.scdc-controls {
+	margin-bottom: 1.25rem;
+}
+.scdc-controls > * + * {
+	margin-top: 0.5rem; /* ~8px between toolbar / view / note */
+}
+/* Two intentional rows: search + Export together, then the two filters
+   sharing a row — so nothing auto-stacks into a tall column of controls. */
+.scdc-controls-row {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}
+.scdc-controls-row-filters { align-items: stretch; }
+.scdc-field { min-width: 0; }
+.scdc-field-search { flex: 1 1 auto; }
+.scdc-field-download { flex: 0 0 auto; }
+.scdc-field-pos,
+.scdc-field-team { flex: 1 1 0; }
+
+/* ---- Export button (secondary — soft, gold only on hover) ---- */
+.scdc-download {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	width: 100%;
+	height: 2.0625rem; /* 33px — 25% shorter than the old 44px */
+	padding: 0 1rem;
+	background: #fff;
+	color: var(--sc-navy);
+	font-weight: 600;
+	font-size: 0.85rem; /* 15% smaller than the old 1rem */
+	border: 1px solid var(--sc-border);
+	border-radius: 8px;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background-color 0.12s, border-color 0.12s, opacity 0.12s;
+}
+.scdc-download:hover { background: var(--sc-gold-soft); border-color: var(--sc-gold); }
+.scdc-download:disabled { opacity: 0.5; cursor: not-allowed; }
+.scdc-download svg { display: block; }
+
+.scdc-input,
+.scdc-select {
+	width: 100%;
+	height: 2.0625rem; /* 33px — 25% shorter than the old 44px */
+	padding: 0 0.75rem;
+	font-size: 0.85rem; /* 15% smaller than the old 1rem */
+	color: var(--sc-ink);
+	background: #fff;
+	border: 1px solid var(--sc-border);
+	border-radius: 8px;
+	outline: none;
+}
+.scdc-select { font-weight: 500; cursor: pointer; }
+.scdc-input:focus,
+.scdc-select:focus {
+	border-color: var(--sc-blue);
+	box-shadow: 0 0 0 3px rgba(15, 79, 216, 0.12);
+}
+.scdc-input::placeholder { color: var(--sc-muted); }
+
+/* ---- Search autocomplete dropdown ---- */
+.scdc-search-wrap { position: relative; width: 100%; }
+.scdc-suggest {
+	display: none;
+	position: absolute;
+	z-index: 30;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	max-height: 16rem;
+	overflow-y: auto;
+	background: #fff;
+	border: 1px solid var(--sc-border);
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+	padding: 0.25rem;
+}
+.scdc-suggest-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.4rem 0.5rem;
+	border-radius: 6px;
+	cursor: pointer;
+}
+.scdc-suggest-item.is-active { background: var(--sc-row-hover); }
+.scdc-suggest-left {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	min-width: 0;
+}
+/* Name + position code sit inline, baseline-aligned. */
+.scdc-suggest-main {
+	display: flex;
+	align-items: baseline;
+	gap: 0.375rem;
+	min-width: 0;
+}
+.scdc-suggest-label {
+	min-width: 0;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--sc-ink);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.scdc-suggest-pos {
+	flex: 0 0 auto;
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.scdc-suggest-type {
+	flex: 0 0 auto;
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--sc-faint);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---- Dropdown row imagery (transparent-background logos) ---- */
+.scdc-sg-avatar {
+	position: relative;
+	flex: 0 0 auto;
+	width: 1.75rem;
+	height: 1.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scdc-sg-head {
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 999px;
+	object-fit: cover;
+	background: var(--sc-bg);
+}
+.scdc-sg-logo {
+	width: 1.5rem;
+	height: 1.5rem;
+	object-fit: contain;
+}
+/* Small team-logo badge overlaid on the player headshot; transparent. */
+.scdc-sg-badge {
+	position: absolute;
+	right: -2px;
+	bottom: -2px;
+	width: 0.85rem;
+	height: 0.85rem;
+	object-fit: contain;
+}
+.scdc-sg-fallback {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 999px;
+	background: var(--sc-bg);
+	font-size: 0.6rem;
+	font-weight: 700;
+	color: var(--sc-navy);
+}
+
+/* ---- View switch + quiet results count ---- */
+.scdc-view {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 0.75rem;
+}
+/* Top header band: the view switch sits above the toolbar, divided by a rule. */
+.scdc-header {
+	padding-bottom: 0.75rem;
+	border-bottom: 1px solid var(--sc-border);
+}
+.scdc-tabs {
+	display: inline-flex; /* fits its tabs, not the full toolbar width */
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	padding: 0.25rem;
+	background: var(--sc-bg);
+	border: 1px solid var(--sc-border);
+	border-radius: 0.5rem;
+}
+.scdc-tab {
+	appearance: none;
+	border: 0;
+	background: transparent;
+	color: var(--sc-muted);
+	font-weight: 600;
+	font-size: 0.875rem;
+	padding: 0.5rem 1.25rem;
+	border-radius: 0.375rem;
+	cursor: pointer;
+	transition: color 0.12s;
+}
+.scdc-tab:hover { color: var(--sc-ink); }
+.scdc-tab.is-active {
+	background: linear-gradient(180deg, #f7c63d, #efb91b);
+	color: var(--sc-navy);
+	font-weight: 700;
+	box-shadow: 0 2px 6px rgba(210, 160, 20, 0.18);
+}
+
+/* ---- Quiet results count (secondary context) ---- */
+.scdc-context {
+	margin-left: auto;
+	font-size: 0.75rem;
+	color: var(--sc-muted);
+}
+/* Mobile-only copy of the count, rendered above the first team card. */
+.scdc-context-mobile {
+	display: none;
+	margin: 0 0 0.5rem;
+	font-size: 0.75rem;
+	color: var(--sc-muted);
+}
+@media (max-width: 640px) {
+	.scdc-header .scdc-context { display: none; }
+	.scdc-context-mobile { display: block; }
+}
+
+/* ---- Fantasy note (soft informational aside — hugs its content) ---- */
+.scdc-fantasy-note {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0;
+	padding: 8px 12px;
+	background: rgba(245, 185, 66, 0.08);
+	border: 1px solid rgba(245, 185, 66, 0.24);
+	border-radius: 8px;
+	color: #475569;
+	font-size: 0.8125rem;
+	line-height: 1.35;
+}
+.scdc-fantasy-note svg {
+	flex: 0 0 auto;
+	color: rgba(201, 151, 0, 0.9);
+}
+
+/* ---- Team grid ---- */
+.scdc-grid {
+	display: grid;
+	gap: 1rem; /* clear-but-compact separation between team surfaces */
+	align-items: start;
+}
+/* One cohesive premium surface per franchise — header + every position group,
+   on a subtle cool-gray card with a soft layered shadow. */
+.scdc-team-card {
+	min-width: 0;
+	background: var(--sc-card);
+	border: 1px solid var(--sc-card-border);
+	border-radius: 18px;
+	padding: 1.1rem 1.15rem 1rem;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px rgba(15, 23, 42, 0.035);
+	transition: box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.scdc-team-card:hover {
+	border-color: #d7deec;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+.scdc-team-head {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.875rem;
+	min-width: 0;
+}
+.scdc-team-title {
+	min-width: 0;
+}
+.scdc-team-summary {
+	margin-top: 0.25rem;
+	font-size: 11px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	color: var(--sc-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.scdc-logo {
+	width: 3.25rem;
+	height: 3.25rem;
+	flex: 0 0 auto;
+	border-radius: 1rem;
+	background: var(--sc-bg);
+	border: 1px solid var(--sc-card-border);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+.scdc-logo img { width: 2.5rem; height: 2.5rem; object-fit: contain; }
+.scdc-logo span { font-size: 0.875rem; font-weight: 800; color: var(--sc-navy); }
+.scdc-team-name {
+	display: block;
+	font-weight: 800;
+	color: var(--sc-navy);
+	font-size: 1.25rem;
+	line-height: 1.15;
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ---- Position columns ---- */
+.scdc-cols {
+	overflow-x: auto;
+	margin: 0 -0.25rem;
+	padding: 0 0.25rem;
+}
+.scdc-cols-inner {
+	display: grid;
+	gap: 0.5rem;
+}
+.scdc-col { min-width: 0; container-type: inline-size; }
+/* Fit-to-width: --sc-fit is 1 normally and drops to 0.8 (set in JS on the
+   .scdc-cols scroll strip) when a card's columns overflow and would otherwise
+   force horizontal scrolling. It scales the column track widths (built in JS)
+   and the horizontal table padding below by up to 20% so more columns fit.
+   At --sc-fit:1 these equal the original 0.5rem / 0.25rem values. */
+/* Editorial position header: quiet uppercase eyebrow + count badge, replacing
+   the old heavy navy bar. Horizontal padding stays --sc-fit-scaled so the label
+   and the player names below share the same left inset. */
+.scdc-col-head {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.125rem calc(0.5rem * var(--sc-fit, 1));
+	min-width: 0;
+}
+.scdc-colhead-text {
+	min-width: 0;
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--sc-navy);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.scdc-col-count {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.1rem;
+	height: 1.1rem;
+	padding: 0 0.25rem;
+	border-radius: 999px;
+	background: var(--sc-bg);
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--sc-muted);
+	font-variant-numeric: tabular-nums;
+}
+/* Short gold micro-accent then a light hairline across the column width. */
+.scdc-col-rule {
+	height: 2px;
+	margin: 4px 0 5px;
+	border-radius: 2px;
+	background: linear-gradient(
+		to right,
+		var(--sc-gold) 0,
+		var(--sc-gold) 1.35rem,
+		var(--sc-rule) 1.35rem,
+		var(--sc-rule) 100%
+	);
+}
+.scdc-col-body {
+	padding: 0 calc(0.25rem * var(--sc-fit, 1)) 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+.scdc-col-empty { padding: 0.0625rem 0.5rem; font-size: 0.75rem; color: var(--sc-faint); }
+
+/* ---- Player rows — directly on the team surface, subtle hover ---- */
+.scdc-player {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.375rem;
+	padding: 3px calc(0.375rem * var(--sc-fit, 1)) 3px calc(0.5rem * var(--sc-fit, 1));
+	border-radius: 6px;
+	border-left: 2px solid transparent;
+	background: transparent;
+	transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.scdc-player:hover {
+	background: var(--sc-row-hover);
+	border-left-color: var(--sc-gold);
+}
+.scdc-rank {
+	width: 1.25rem;
+	flex: 0 0 auto;
+	text-align: left;
+	/* Keep the rank size locked to the player-name size. */
+	font-size: 0.875rem;
+	font-variant-numeric: tabular-nums;
+	line-height: 0.919rem;
+	color: var(--sc-faint);
+}
+.scdc-name {
+	flex: 1 1 auto;
+	min-width: 0;
+	word-break: break-word;
+	line-height: 0.919rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--sc-ink);
+	transition: color 0.15s;
+}
+.scdc-player:hover .scdc-name { color: var(--sc-navy); }
+
+.scdc-name-abbr { display: none; }             /* full name shown by default */
+.scdc-colhead-abbr { display: none; }          /* full header shown by default */
+
+/* Small mobile screens: shrink the depth-chart text ~20% so more fits per row.
+   Viewport-based (not the per-column container query below), so it applies to
+   the column headers and player rows regardless of how wide each column is. */
+@media (max-width: 480px) {
+	.scdc-name, .scdc-rank { font-size: 0.7rem; }   /* 0.875rem → 0.7rem */
+	.scdc-colhead-text { font-size: 9px; }          /* 11px → ~9px */
+
+	/* Shrink the view-switch tab text (and tighten padding) so all four tabs stay
+	   on a single row instead of wrapping "Special Teams" to a second line. */
+	.scdc-tab { font-size: 0.72rem; padding-left: 0.625rem; padding-right: 0.625rem; }
+}
+
+/* Step 1 — a position column squeezed toward its min width: compact the left
+   gutter, rank column and text. */
+@container (max-width: 8.75rem) {
+	.scdc-player { padding-left: 1px; }            /* + 4px body padding = 5px gap */
+	.scdc-rank { width: 0.9rem; font-size: 0.7rem; } /* pull the name left with the number */
+	.scdc-name { font-size: 0.7rem; }              /* 20% smaller, rank locked to name */
+}
+
+/* Header labels ("WIDE RECEIVERS") are long — plus the count badge and padding
+   they need ~10rem to fit. Swap them to the compact form ("WR") well before that
+   width so the full label is never shown mid-truncation (the old 7rem swap left
+   a band where "WIDE RECEIV…" flashed before collapsing to "WR"). Decoupled from
+   the player-name swap below, which stays at 7rem since names are shorter. */
+@container (max-width: 10rem) {
+	.scdc-colhead-full { display: none; }
+	.scdc-colhead-abbr { display: inline; }
+}
+
+/* Step 2 — column at its narrowest (scrolling) width even after the text
+   shrank: switch the name to "first-initial last-name". */
+@container (max-width: 7rem) {
+	.scdc-name-full { display: none; }
+	.scdc-name-abbr { display: block; }
+}
+
+/* Step 3 — column at its narrowest (scrolling) width: drop the depth numbers
+   and align the player names directly under the column header text (both land
+   9px in — 1px border + 8px header padding vs 1px border + 4px body padding + 4px). */
+@container (max-width: 6rem) {
+	.scdc-rank { display: none; }
+	.scdc-move { display: none; }          /* keep every name aligned under the header */
+	.scdc-player { padding-left: 4px; }
+}
+.scdc-move { flex: 0 0 auto; font-size: 0.7rem; line-height: 0.919rem; }
+.scdc-move-up { color: #059669; }
+.scdc-move-down { color: #ef4444; }
+
+.scdc-badges { display: flex; align-items: center; gap: 0.25rem; flex: 0 0 auto; }
+.scdc-badge {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 4px;
+	padding: 0 0.25rem;
+	font-size: 9px;
+	line-height: 1rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.scdc-badge-new { background: #dbeafe; color: #1d4ed8; }
+.scdc-badge-warn { background: #fef3c7; color: #b45309; }
+.scdc-badge-out { background: #fee2e2; color: #dc2626; }
+
+
+/* ---- SEO chrome for the team routes ------------------------------------
+   Breadcrumbs, H1, intro, "at a glance" summary and the crawlable team-link
+   grid live outside .scdc-root (they wrap it), so the same design tokens are
+   redeclared here. Deliberately quiet: the interactive tool stays the focus.
+
+   NOTE: everything here uses the scdc-seo-* namespace. The tool's own card
+   internals use scdc-team-* — .scdc-team-summary is already the per-card
+   "3 QB · 6 RB · …" strip, so reusing that name boxed it in and pushed the
+   team name out of line with its logo. Keep the two namespaces apart. */
+/* Width: fill the container up to 1240px, then stop and centre — so the tool
+   lines up with the rest of the page instead of tracking the viewport as it is
+   zoomed out.
+
+   width:100% is what makes it *fill* the cap; max-width is what stops it. Both
+   margins are auto together, never one alone: a lone auto margin in a flex or
+   grid parent doesn't centre anything, it shoves the tool to one side and opens
+   a gap down the other.
+
+   The gutter is explicit rather than inherited from whatever space the cap
+   happened to leave over, so the tool keeps the same breathing room at every
+   width. border-box keeps 1240px the *outer* width, gutter included.
+
+   Both are tunable without editing this file, in the builder's custom CSS:
+
+       .scdc-page { --scdc-max-width: 1440px; --scdc-gutter: 30px; }
+
+   or in PHP:  add_filter( 'scdc_max_width', function () { return '1440px'; } ); */
+.scdc-page,
+.scdc-root {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--scdc-max-width, 1240px);
+	margin-left: auto;
+	margin-right: auto;
+}
+.scdc-page {
+	padding-left: var(--scdc-gutter, 20px);
+	padding-right: var(--scdc-gutter, 20px);
+}
+
+.scdc-page {
+	--sc-ink: #1f2b45;
+	--sc-muted: #64748b;
+	--sc-border: #dbe3ef;
+	--sc-rule: #eef2f8;
+	--sc-blue: #0f4fd8;
+	--sc-card: #ffffff;
+
+	color: var(--sc-ink);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.scdc-page *,
+.scdc-page *::before,
+.scdc-page *::after {
+	box-sizing: border-box;
+}
+
+/* Breadcrumbs (only rendered when no SEO plugin is printing its own). */
+.scdc-breadcrumbs {
+	font-size: 13px;
+	color: var(--sc-muted);
+	margin: 0 0 10px;
+}
+.scdc-breadcrumb-list {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+}
+.scdc-breadcrumb-list li {
+	margin: 0;
+}
+.scdc-breadcrumbs a {
+	color: var(--sc-muted);
+	text-decoration: none;
+}
+.scdc-breadcrumbs a:hover {
+	color: var(--sc-blue);
+	text-decoration: underline;
+}
+.scdc-breadcrumb-sep {
+	margin-left: 6px;
+	color: #b6c2d4;
+}
+
+/* Team H1 — only rendered when the theme/Divi has no title to rename. */
+.scdc-seo-h1 {
+	margin: 0 0 8px;
+}
+
+.scdc-seo-intro {
+	margin: 0 0 14px;
+	color: var(--sc-muted);
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+/* "At a glance" — built server-side from the same cached depth-chart data. */
+.scdc-seo-summary {
+	/* Belt and braces: this block is prose and must always wrap, whatever
+	   white-space/overflow rule the theme (or a stale stylesheet) hands down. */
+	white-space: normal;
+	overflow-wrap: break-word;
+	text-overflow: clip;
+	border: 1px solid var(--sc-border);
+	border-radius: 10px;
+	background: var(--sc-card);
+	padding: 14px 16px;
+	margin: 0 0 16px;
+}
+.scdc-seo-summary-title {
+	margin: 0 0 8px;
+	font-size: 16px;
+	line-height: 1.3;
+}
+.scdc-seo-summary-lead {
+	margin: 0 0 10px;
+	font-size: 14px;
+	line-height: 1.55;
+}
+.scdc-seo-summary-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+}
+.scdc-seo-summary-list li {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	font-size: 14px;
+	padding-bottom: 6px;
+	border-bottom: 1px solid var(--sc-rule);
+}
+.scdc-seo-summary-list li:last-child {
+	border-bottom: 0;
+	padding-bottom: 0;
+}
+.scdc-seo-summary-pos {
+	min-width: 130px;
+	color: var(--sc-muted);
+	font-weight: 600;
+}
+.scdc-seo-summary-meta {
+	margin: 10px 0 0;
+	font-size: 12px;
+	color: var(--sc-muted);
+}
+
+/* Crawlable links to all 32 team routes. */
+.scdc-seo-links {
+	margin: 22px 0 0;
+	padding-top: 16px;
+	border-top: 1px solid var(--sc-border);
+}
+.scdc-seo-links-title {
+	margin: 0 0 10px;
+	font-size: 17px;
+	line-height: 1.3;
+}
+.scdc-seo-links-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 4px 16px;
+}
+.scdc-seo-links-grid li {
+	margin: 0;
+}
+.scdc-seo-link {
+	display: block;
+	padding: 5px 0;
+	font-size: 14px;
+	color: var(--sc-blue);
+	text-decoration: none;
+}
+.scdc-seo-link:hover {
+	text-decoration: underline;
+}
+.scdc-seo-link.is-current {
+	color: var(--sc-ink);
+	font-weight: 600;
+}
+
+/* ---- Imagery-capable select (team + position filters) -------------------
+   Native <option> elements are rendered by the OS and can't hold an image or
+   a per-row colour, so these two filters are a button + listbox instead. The
+   trigger deliberately matches .scdc-select's metrics so the toolbar is
+   unchanged; only the row contents are richer. */
+.scdc-cs {
+	position: relative;
+	width: 100%;
+}
+.scdc-cs-trigger {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	height: 2.0625rem;
+	padding: 0 0.6rem 0 0.75rem;
+	font-family: inherit;
+	font-size: 0.85rem;
+	font-weight: 500;
+	line-height: 1;
+	text-align: left;
+	color: var(--sc-ink);
+	background: #fff;
+	border: 1px solid var(--sc-border);
+	border-radius: 8px;
+	outline: none;
+	cursor: pointer;
+}
+.scdc-cs-trigger:focus-visible,
+.scdc-cs.is-open .scdc-cs-trigger {
+	border-color: var(--sc-blue);
+	box-shadow: 0 0 0 3px rgba(15, 79, 216, 0.12);
+}
+.scdc-cs-value {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.scdc-cs-caret {
+	flex: 0 0 auto;
+	display: inline-flex;
+	color: var(--sc-muted);
+}
+.scdc-cs-list {
+	display: none;
+	position: absolute;
+	z-index: 30;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	max-height: 16rem;
+	overflow-y: auto;
+	background: #fff;
+	border: 1px solid var(--sc-border);
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+	padding: 0.25rem;
+}
+.scdc-cs.is-open .scdc-cs-list {
+	display: block;
+}
+.scdc-cs-option {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem 0.5rem;
+	font-size: 0.85rem;
+	border-radius: 6px;
+	cursor: pointer;
+}
+.scdc-cs-option.is-active {
+	background: var(--sc-row-hover);
+}
+.scdc-cs-option.is-selected {
+	font-weight: 600;
+}
+/* Sized here rather than left to the image's intrinsic 500px. */
+.scdc-cs-logo {
+	flex: 0 0 auto;
+	width: 1.25rem;
+	height: 1.25rem;
+	object-fit: contain;
+}
+.scdc-cs-logo-text {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.6rem;
+	font-weight: 700;
+	color: var(--sc-navy);
+}
+.scdc-cs-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+/* Colour-coded position code; inline colour comes from POSITION_COLOR. */
+.scdc-cs-badge {
+	flex: 0 0 auto;
+	min-width: 1.75rem;
+	text-align: right;
+	font-size: 0.7rem;
+	font-weight: 700;
+	line-height: 1;
+}

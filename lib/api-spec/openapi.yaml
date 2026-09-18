@@ -145,12 +145,18 @@ components:
           type: string
         position:
           type: string
+        playerId:
+          type: ["string", "null"]
         jersey:
           type: ["string", "null"]
         status:
           type: ["string", "null"]
         headshot:
           type: ["string", "null"]
+        movement:
+          type: ["string", "null"]
+          enum: ["up", "down", "new", null]
+          description: Rank change vs the previous snapshot, if known.
 
     DepthChartPositionGroup:
       type: object
@@ -193,9 +199,20 @@ components:
         logo:
           type: ["string", "null"]
 
+    DepthChartPositions:
+      type: object
+      description: >-
+        Matrix-friendly map of canonical column key -> ranked players. Keys
+        cover every column used across the Fantasy / Offense / Defense /
+        Special Teams tabs.
+      additionalProperties:
+        type: array
+        items:
+          $ref: "#/components/schemas/DepthChartPlayer"
+
     DepthChartSnapshot:
       type: object
-      required: [id, team, season, source, sourceUrl, fetchedAt, groups]
+      required: [id, team, season, source, sourceUrl, fetchedAt, groups, positions]
       properties:
         id:
           type: integer
@@ -212,6 +229,8 @@ components:
           format: date-time
         groups:
           $ref: "#/components/schemas/DepthChartGroups"
+        positions:
+          $ref: "#/components/schemas/DepthChartPositions"
 
     RefreshResult:
       type: object

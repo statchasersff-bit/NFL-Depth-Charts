@@ -1,0 +1,17 @@
+{"version":1,"season":2026,"fetchedAt":"2026-08-18T13:05:00+00:00","teams":[
+ {"team":{"abbr":"HOU","name":"Houston Texans"},"season":2026,"positions":{
+   "FAN_QB":[{"rank":1,"name":"C.J. Stroud"},{"rank":2,"name":"Davis Mills"}],
+   "FAN_RB":[{"rank":1,"name":"Joe Mixon"},{"rank":2,"name":"Dameon Pierce"},{"rank":3,"name":"Dare Ogunbowale"}],
+   "FAN_WR":[{"rank":1,"name":"Nico Collins"},{"rank":2,"name":"Tank Dell"},{"rank":3,"name":"Christian Kirk"}],
+   "FAN_TE":[{"rank":1,"name":"Dalton Schultz"},{"rank":2,"name":"Cade Stover"}]}},
+ {"team":{"abbr":"DAL","name":"Dallas Cowboys"},"season":2026,"positions":{
+   "FAN_QB":[{"rank":1,"name":"Dak Prescott"}],
+   "FAN_RB":[{"rank":1,"name":"Javonte Williams"},{"rank":2,"name":"Jaydon Blue"}],
+   "FAN_WR":[{"rank":1,"name":"CeeDee Lamb"},{"rank":2,"name":"George Pickens"}],
+   "FAN_TE":[{"rank":1,"name":"Jake Ferguson"}]}},
+ {"team":{"abbr":"BUF","name":"Buffalo Bills"},"season":2026,"positions":{
+   "FAN_QB":[{"rank":1,"name":"Josh Allen"}],
+   "FAN_RB":[{"rank":1,"name":"James Cook"}],
+   "FAN_WR":[{"rank":1,"name":"Khalil Shakir"}],
+   "FAN_TE":[{"rank":1,"name":"Dalton Kincaid"}]}}
+]}

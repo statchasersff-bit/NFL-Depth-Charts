@@ -1,0 +1,194 @@
+/* StatChasers NFL hub (/nfl/) — scoped under .scdc-hub, self-contained tokens. */
+
+.scdc-hub {
+	--sc-bg: #f7f9fc;
+	--sc-card: #ffffff;
+	--sc-ink: #172033;
+	--sc-muted: #64748b;
+	--sc-border: #dbe3ef;
+	--sc-navy: #111827;
+	--sc-header: #1e3a6e;
+	--sc-blue: #0f4fd8;
+	--sc-gold: #f6c343;
+	--sc-gold-dark: #c99700;
+	--sc-gold-soft: #fff6d6;
+
+	color: var(--sc-ink);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	box-sizing: border-box;
+}
+.scdc-hub *,
+.scdc-hub *::before,
+.scdc-hub *::after { box-sizing: border-box; }
+
+.scdc-hub a { text-decoration: none; }
+
+/* ---- Hero ---- */
+.scdc-hub-hero {
+	background: linear-gradient(135deg, var(--sc-header), var(--sc-navy));
+	color: #fff;
+	border-radius: 16px;
+	padding: 2.5rem 2rem;
+	text-align: center;
+	border-bottom: 4px solid var(--sc-gold);
+}
+.scdc-hub-title {
+	margin: 0 0 0.5rem;
+	font-size: clamp(1.8rem, 4vw, 2.6rem);
+	font-weight: 800;
+	color: #fff;
+}
+.scdc-hub-tagline {
+	margin: 0 auto 1.5rem;
+	max-width: 42rem;
+	color: #dbe3ef;
+	font-size: 1.05rem;
+}
+.scdc-hub-cta {
+	display: inline-block;
+	background: linear-gradient(to bottom, var(--sc-gold), var(--sc-gold-dark));
+	color: var(--sc-navy);
+	font-weight: 700;
+	padding: 0.75rem 1.5rem;
+	border-radius: 9999px;
+	box-shadow: 0 2px 8px rgba(201, 151, 0, 0.4);
+}
+.scdc-hub-cta:hover { filter: brightness(1.05); }
+
+/* ---- Intro ---- */
+.scdc-hub-intro {
+	max-width: 52rem;
+	margin: 1.75rem auto 0;
+	text-align: center;
+	color: var(--sc-muted);
+	font-size: 1.02rem;
+}
+
+/* ---- Sections ---- */
+.scdc-hub-section { margin-top: 2.25rem; }
+.scdc-hub-h2 {
+	font-size: 1.35rem;
+	font-weight: 800;
+	color: var(--sc-navy);
+	margin: 0 0 1rem;
+	padding-bottom: 0.4rem;
+	border-bottom: 2px solid var(--sc-gold);
+}
+
+/* ---- Tool cards ---- */
+.scdc-hub-cards {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+	align-items: start;
+}
+.scdc-hub-card {
+	display: block;
+	position: relative;
+	background: var(--sc-card);
+	border: 1px solid var(--sc-border);
+	border-top: 4px solid var(--sc-border);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+	padding: 1.25rem;
+	color: var(--sc-ink);
+	transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+}
+.scdc-hub-card:hover {
+	box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+	transform: translateY(-2px);
+	border-color: var(--sc-gold);
+}
+.scdc-hub-card-featured {
+	grid-column: 1 / -1;
+	border-top-color: var(--sc-gold);
+	background: linear-gradient(180deg, var(--sc-gold-soft), var(--sc-card) 38%);
+}
+.scdc-hub-badge {
+	display: inline-block;
+	background: var(--sc-gold);
+	color: var(--sc-navy);
+	font-size: 0.7rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	padding: 0.15rem 0.5rem;
+	border-radius: 4px;
+	margin-bottom: 0.5rem;
+}
+.scdc-hub-card-title {
+	margin: 0 0 0.4rem;
+	font-size: 1.2rem;
+	font-weight: 700;
+	color: var(--sc-navy);
+}
+.scdc-hub-card-featured .scdc-hub-card-title { font-size: 1.5rem; }
+.scdc-hub-card-desc { margin: 0 0 0.75rem; color: var(--sc-muted); font-size: 0.95rem; }
+.scdc-hub-card-cta { font-weight: 700; color: var(--sc-blue); font-size: 0.9rem; }
+
+/* ---- Popular views (inside featured card) ---- */
+.scdc-hub-views { margin: 0.75rem 0; }
+.scdc-hub-views-label {
+	display: block;
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--sc-muted);
+	margin-bottom: 0.4rem;
+}
+.scdc-hub-views ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+.scdc-hub-views li a {
+	display: inline-block;
+	background: #fff;
+	border: 1px solid var(--sc-border);
+	border-radius: 9999px;
+	padding: 0.25rem 0.75rem;
+	font-size: 0.85rem;
+	color: var(--sc-blue);
+	font-weight: 600;
+}
+.scdc-hub-views li a:hover { background: var(--sc-gold-soft); border-color: var(--sc-gold); }
+
+/* ---- Articles ---- */
+.scdc-hub-articles { list-style: none; margin: 0; padding: 0; }
+.scdc-hub-articles li {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 1rem;
+	padding: 0.6rem 0;
+	border-bottom: 1px solid var(--sc-border);
+}
+.scdc-hub-articles li a { color: var(--sc-blue); font-weight: 600; }
+.scdc-hub-articles li a:hover { color: var(--sc-navy); }
+.scdc-hub-article-date { color: var(--sc-muted); font-size: 0.82rem; white-space: nowrap; }
+
+/* ---- Quick links ---- */
+.scdc-hub-links {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+.scdc-hub-links li a {
+	display: inline-block;
+	background: var(--sc-bg);
+	border: 1px solid var(--sc-border);
+	border-radius: 8px;
+	padding: 0.5rem 1rem;
+	color: var(--sc-navy);
+	font-weight: 600;
+	font-size: 0.92rem;
+}
+.scdc-hub-links li a:hover { background: var(--sc-gold-soft); border-color: var(--sc-gold); }

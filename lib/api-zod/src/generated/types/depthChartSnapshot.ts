@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { DepthChartGroups } from './depthChartGroups';
+import type { DepthChartPositions } from './depthChartPositions';
 import type { DepthChartTeam } from './depthChartTeam';
 
 export interface DepthChartSnapshot {
@@ -16,4 +17,5 @@ export interface DepthChartSnapshot {
   sourceUrl: string;
   fetchedAt: Date;
   groups: DepthChartGroups;
+  positions: DepthChartPositions;
 }

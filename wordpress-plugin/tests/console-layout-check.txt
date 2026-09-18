@@ -1,0 +1,202 @@
+StatChasers depth chart — layout diagnostic
+===========================================
+
+WHAT THIS DOES
+  Walks up from the depth-chart tool through every ancestor and prints each
+  one's width, position, padding, margins and display mode — then compares the
+  tool's width against a neighbouring Divi module in the same row. That tells
+  us exactly which element is setting the width or creating a gap, instead of
+  guessing from a description.
+
+HOW TO RUN IT
+  1. Open the page with the tool on it, e.g.
+     https://statchasers.com/nfl/nfl-depth-charts/fantasy/houston-texans/
+  2. Press F12 (or Cmd+Option+I on a Mac) and click the "Console" tab.
+  3. Chrome only, first time: it will refuse to paste and ask you to type
+     "allow pasting" and press Enter. Do that once, then continue.
+  4. Copy EVERYTHING between the two ==== lines below, paste it at the "> "
+     prompt, and press Enter.
+  5. Copy the printed block and send it back to me.
+
+  Run it on a desktop-width window, since that is where the width behaves
+  differently from the neighbouring modules.
+
+==== COPY FROM HERE ====
+(() => {
+  const out = [];
+  const px = v => Math.round(parseFloat(v) || 0);
+  const tool = document.querySelector('.scdc-page') || document.querySelector('.scdc-root');
+  if (!tool) { console.log('No depth-chart tool found on this page.'); return; }
+
+  out.push('VIEWPORT ' + window.innerWidth + 'x' + window.innerHeight +
+           '  dpr=' + window.devicePixelRatio + '  zoom~' +
+           Math.round((window.outerWidth / window.innerWidth) * 100) / 100);
+  out.push('');
+  out.push('ANCESTORS (nearest first)');
+  out.push('left  width  pad-l pad-r  mar-l mar-r  max-width   display    element');
+
+  let n = tool, depth = 0;
+  while (n && n !== document.documentElement && depth < 14) {
+    const s = getComputedStyle(n), r = n.getBoundingClientRect();
+    const name = n.tagName.toLowerCase() +
+      (n.id ? '#' + n.id : '') +
+      (n.className && typeof n.className === 'string'
+        ? '.' + n.className.trim().split(/\s+/).slice(0, 3).join('.')
+        : '');
+    out.push(
+      String(Math.round(r.left)).padEnd(6) +
+      String(Math.round(r.width)).padEnd(7) +
+      String(px(s.paddingLeft)).padEnd(6) + String(px(s.paddingRight)).padEnd(7) +
+      (s.marginLeft === 'auto' ? 'auto' : px(s.marginLeft)).toString().padEnd(6) +
+      (s.marginRight === 'auto' ? 'auto' : px(s.marginRight)).toString().padEnd(7) +
+      s.maxWidth.padEnd(12) + s.display.padEnd(11) + name
+    );
+    n = n.parentElement; depth++;
+  }
+
+  const others = [...document.querySelectorAll('.et_pb_module, .et_pb_text, .et_pb_row')]
+    .filter(el => !el.contains(tool))
+    .slice(0, 6);
+  out.push('');
+  out.push('NEIGHBOURING MODULES (for comparison)');
+  if (!others.length) out.push('  none found');
+  others.forEach(el => {
+    const r = el.getBoundingClientRect();
+    out.push('  left ' + Math.round(r.left) + '  width ' + Math.round(r.width) + '  ' +
+      el.tagName.toLowerCase() + '.' + String(el.className).trim().split(/\s+/).slice(0, 3).join('.'));
+  });
+
+  const tr = tool.getBoundingClientRect();
+  const ts = getComputedStyle(tool);
+  out.push('');
+  out.push('TOOL: left ' + Math.round(tr.left) + '  width ' + Math.round(tr.width) +
+           '  max-width ' + ts.maxWidth +
+           '  padding ' + px(ts.paddingLeft) + '/' + px(ts.paddingRight) +
+           '  --scdc-max-width "' + ts.getPropertyValue('--scdc-max-width').trim() + '"' +
+           '  --scdc-gutter "' + ts.getPropertyValue('--scdc-gutter').trim() + '"');
+
+  const css = [...document.styleSheets].some(sh => (sh.href || '').includes('statchasers-depth-charts'));
+  out.push('PLUGIN STYLESHEET LINKED: ' + css +
+           '   VERSION: ' + ([...document.querySelectorAll('link[href*="statchasers-depth-charts"]')]
+             .map(l => (l.href.match(/ver=([^&]+)/) || [])[1]).join(',') || 'unknown'));
+  out.push('SUGGEST-DROPDOWN RULES PRESENT: ' + (() => {
+    try {
+      return [...document.styleSheets].some(sh => {
+        try { return [...sh.cssRules].some(r => (r.selectorText || '').includes('scdc-sg-logo')); }
+        catch (e) { return false; }
+      });
+    } catch (e) { return 'unknown'; }
+  })());
+
+  console.log(out.join('\n'));
+})();
+==== COPY TO HERE ====
+
+WHAT I LEARN FROM IT
+  - "TOOL width" vs the neighbouring modules' widths: whether the tool really is
+    wider/narrower, and by how many pixels.
+  - The ancestor rows: which element is full-width, or which one carries the
+    padding your other modules get and the tool's container does not.
+  - PLUGIN STYLESHEET / VERSION: confirms the deployed build is the one I think
+    it is, and is not being served stale from a cache.
+  - SUGGEST-DROPDOWN RULES PRESENT: if this says false, the "Remove Unused CSS"
+    optimisation is stripping the rules for the team logos and position codes in
+    the search dropdown.
+
+
+===========================================================================
+SNIPPET 2 — why the dropdown has no logos / position codes on production
+===========================================================================
+
+  Run this on PRODUCTION, then again on the dev preview, and send me both.
+  It opens the search dropdown itself and reports what is actually in the DOM,
+  which separates the three possible causes: missing data, blocked images, or
+  stripped CSS.
+
+  Same paste rules as above (Chrome may ask you to type "allow pasting" first).
+
+==== COPY FROM HERE ====
+(() => {
+  const input = document.querySelector('.scdc-root .scdc-input');
+  if (!input) { console.log('Tool not found — is it finished loading?'); return; }
+  input.focus();
+  input.dispatchEvent(new Event('focus'));
+  input.click();
+
+  setTimeout(() => {
+    const out = [];
+    const box = document.querySelector('.scdc-suggest');
+    if (!box) { console.log('Dropdown never opened.'); return; }
+
+    out.push('JS/CSS BUILD: ' +
+      [...document.querySelectorAll('link[href*="statchasers"],script[src*="statchasers"]')]
+        .map(t => (t.href || t.src).split('/').pop()).join('  '));
+    out.push('DROPDOWN ROWS: ' + box.children.length +
+             '   display=' + getComputedStyle(box).display);
+    out.push('');
+
+    const imgs = [...box.querySelectorAll('img')];
+    out.push('IMAGES IN DROPDOWN: ' + imgs.length);
+    imgs.slice(0, 4).forEach(img => {
+      const s = getComputedStyle(img);
+      out.push('  src=' + (img.getAttribute('src') || '(none)').slice(0, 60));
+      out.push('    data-src=' + (img.getAttribute('data-src') || '-') +
+               '  class="' + img.className + '"');
+      out.push('    loaded=' + img.complete + ' natural=' + img.naturalWidth + 'x' + img.naturalHeight +
+               '  rendered=' + Math.round(img.getBoundingClientRect().width) + 'x' +
+               Math.round(img.getBoundingClientRect().height) +
+               '  display=' + s.display + ' visibility=' + s.visibility);
+    });
+    if (!imgs.length) out.push('  -> no <img> elements at all: the cached JSON has no team.logo values.');
+
+    out.push('');
+    const pos = [...box.querySelectorAll('.scdc-suggest-pos')];
+    out.push('POSITION CODES: ' + pos.length);
+    pos.slice(0, 4).forEach(p => {
+      const s = getComputedStyle(p);
+      out.push('  text="' + p.textContent + '"  rendered=' +
+               Math.round(p.getBoundingClientRect().width) + 'px' +
+               '  flex=' + s.flex + '  color=' + s.color +
+               '  display=' + s.display + ' visibility=' + s.visibility +
+               '  overflow=' + s.overflow);
+    });
+    if (!pos.length) out.push('  -> no .scdc-suggest-pos elements: the dropdown is showing team rows only,' +
+                              ' or an old frontend.js is cached.');
+
+    let hasRules = 'unknown';
+    try {
+      hasRules = [...document.styleSheets].some(sh => {
+        try { return [...sh.cssRules].some(r => (r.selectorText || '').includes('scdc-suggest-pos')); }
+        catch (e) { return false; }
+      });
+    } catch (e) {}
+    out.push('');
+    out.push('CSS RULE .scdc-suggest-pos PRESENT: ' + hasRules);
+    out.push('INLINE FLEX GUARD (needs plugin >= 1.5.3): ' +
+             (pos[0] ? (pos[0].style.flex || '(absent — older build is live)') : 'n/a'));
+
+    console.log(out.join('\n'));
+  }, 600);
+})();
+==== COPY TO HERE ====
+
+HOW TO READ SNIPPET 2
+  no <img> at all .................. the cached depth-charts.json on production
+                                     has no team.logo values — re-run the
+                                     refresh in StatChasers Data Refresh.
+  <img> present, natural=0x0 ....... the image never loaded: blocked by a
+                                     Content-Security-Policy header, hotlink
+                                     protection, or an ad/privacy blocker
+                                     stopping a.espncdn.com.
+  <img> present, data-src set ...... a lazy-load plugin swapped the src for a
+                                     placeholder inside the popover.
+  <img> loaded but rendered=0x0 .... the CSS sizing rule was stripped
+                                     (Remove Unused CSS).
+  POSITION CODES: 0 ................ an old frontend.js is still cached on
+                                     production.
+  codes present, rendered=0px ...... squeezed out by the flex row, i.e. the
+                                     stylesheet was stripped AND the build
+                                     predates the inline flex guard.
+  INLINE FLEX GUARD absent ......... production is running a plugin build older
+                                     than 1.5.3, whatever the version string says
+                                     — a stale cached frontend.js.

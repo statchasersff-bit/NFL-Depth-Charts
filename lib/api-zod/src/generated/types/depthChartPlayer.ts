@@ -5,15 +5,28 @@
  * StatChasers NFL Depth Charts API
  * OpenAPI spec version: 0.1.0
  */
+import type { DepthChartPlayerMovement } from './depthChartPlayerMovement';
 
 export interface DepthChartPlayer {
   rank: number;
   name: string;
   position: string;
   /** @nullable */
+  playerId?: string | null;
+  /** @nullable */
   jersey?: string | null;
   /** @nullable */
   status?: string | null;
   /** @nullable */
   headshot?: string | null;
+  /**
+     * Link to the player's profile page on the source site, if known.
+     * @nullable
+     */
+  profileUrl?: string | null;
+  /**
+     * Rank change vs the previous snapshot, if known.
+     * @nullable
+     */
+  movement?: DepthChartPlayerMovement;
 }

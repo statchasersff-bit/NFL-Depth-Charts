@@ -40,9 +40,12 @@ export const GetAllDepthChartsResponseItem = zod.object({
   "rank": zod.number(),
   "name": zod.string(),
   "position": zod.string(),
+  "playerId": zod.string().nullish(),
   "jersey": zod.string().nullish(),
   "status": zod.string().nullish(),
-  "headshot": zod.string().nullish()
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
 }))
 })),
   "defense": zod.array(zod.object({
@@ -52,9 +55,12 @@ export const GetAllDepthChartsResponseItem = zod.object({
   "rank": zod.number(),
   "name": zod.string(),
   "position": zod.string(),
+  "playerId": zod.string().nullish(),
   "jersey": zod.string().nullish(),
   "status": zod.string().nullish(),
-  "headshot": zod.string().nullish()
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
 }))
 })),
   "specialTeams": zod.array(zod.object({
@@ -64,12 +70,26 @@ export const GetAllDepthChartsResponseItem = zod.object({
   "rank": zod.number(),
   "name": zod.string(),
   "position": zod.string(),
+  "playerId": zod.string().nullish(),
   "jersey": zod.string().nullish(),
   "status": zod.string().nullish(),
-  "headshot": zod.string().nullish()
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
 }))
 }))
-})
+}),
+  "positions": zod.record(zod.string(), zod.array(zod.object({
+  "rank": zod.number(),
+  "name": zod.string(),
+  "position": zod.string(),
+  "playerId": zod.string().nullish(),
+  "jersey": zod.string().nullish(),
+  "status": zod.string().nullish(),
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
+}))).describe('Matrix-friendly map of canonical column key -> ranked players. Keys cover every column used across the Fantasy \/ Offense \/ Defense \/ Special Teams tabs.')
 })
 export const GetAllDepthChartsResponse = zod.array(GetAllDepthChartsResponseItem)
 
@@ -101,9 +121,12 @@ export const GetTeamDepthChartResponse = zod.object({
   "rank": zod.number(),
   "name": zod.string(),
   "position": zod.string(),
+  "playerId": zod.string().nullish(),
   "jersey": zod.string().nullish(),
   "status": zod.string().nullish(),
-  "headshot": zod.string().nullish()
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
 }))
 })),
   "defense": zod.array(zod.object({
@@ -113,9 +136,12 @@ export const GetTeamDepthChartResponse = zod.object({
   "rank": zod.number(),
   "name": zod.string(),
   "position": zod.string(),
+  "playerId": zod.string().nullish(),
   "jersey": zod.string().nullish(),
   "status": zod.string().nullish(),
-  "headshot": zod.string().nullish()
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
 }))
 })),
   "specialTeams": zod.array(zod.object({
@@ -125,12 +151,26 @@ export const GetTeamDepthChartResponse = zod.object({
   "rank": zod.number(),
   "name": zod.string(),
   "position": zod.string(),
+  "playerId": zod.string().nullish(),
   "jersey": zod.string().nullish(),
   "status": zod.string().nullish(),
-  "headshot": zod.string().nullish()
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
 }))
 }))
-})
+}),
+  "positions": zod.record(zod.string(), zod.array(zod.object({
+  "rank": zod.number(),
+  "name": zod.string(),
+  "position": zod.string(),
+  "playerId": zod.string().nullish(),
+  "jersey": zod.string().nullish(),
+  "status": zod.string().nullish(),
+  "headshot": zod.string().nullish(),
+  "profileUrl": zod.string().nullish().describe('Link to the player\'s profile page on the source site, if known.'),
+  "movement": zod.union([zod.literal('up'),zod.literal('down'),zod.literal('new'),zod.literal(null)]).nullish().describe('Rank change vs the previous snapshot, if known.')
+}))).describe('Matrix-friendly map of canonical column key -> ranked players. Keys cover every column used across the Fantasy \/ Offense \/ Defense \/ Special Teams tabs.')
 })
 
 
